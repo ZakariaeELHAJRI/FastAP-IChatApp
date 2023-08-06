@@ -1,0 +1,7 @@
+# dev
+docker-compose.yml
+venv/
+__pycache__/
+
+# misc
+*.md
