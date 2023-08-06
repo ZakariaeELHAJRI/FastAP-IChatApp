@@ -2,7 +2,12 @@ version: "3.8"
 services:
   api:
     build: .
-    command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
+    command: 
+    - bash
+    - -c
+    - |
+      alembic upgrade head
+      uvicorn main:app --host 0.0.0.0 --port 80 --reload
     ports:
     - 8000:80
     environment:
@@ -10,8 +15,12 @@ services:
       DB_NAME               : ${DB_NAME}
       DB_USER               : ${DB_USER}
       DB_PASS               : ${DB_PASS}
+      DB_URI                : ${DB_URI}
     volumes:
     - ./chatapp:/app/chatapp
+    - ./alembic:/app/alembic
+    depends_on:
+    - db
 
   db:
     image: mariadb:11
