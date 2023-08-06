@@ -2,6 +2,8 @@
 docker-compose.yml
 venv/
 __pycache__/
+.env
+.env.example
 
 # misc
 *.md
