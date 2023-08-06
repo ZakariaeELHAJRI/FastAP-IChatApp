@@ -6,6 +6,7 @@ services:
     - bash
     - -c
     - |
+      wait-for-it --service db:3306 --timeout=60
       alembic upgrade head
       uvicorn main:app --host 0.0.0.0 --port 80 --reload
     ports:
