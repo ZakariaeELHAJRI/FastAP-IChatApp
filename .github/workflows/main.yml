@@ -16,7 +16,7 @@ jobs:
         uses: docker/setup-buildx-action@v2
 
       - name: Build API Image
-        run: docker build . --file Dockerfile --tag ghcr.io/aymaneboukrouh/chatapp-api:latest
+        run: docker build . --file Dockerfile --tag ghcr.io/zakariaeelhajri/chatapp-api:latest
 
       - name: Push API Image to GitHub Container Registry
-        run: docker push ghcr.io/aymaneboukrouh/chatapp-api:latest
+        run: docker push ghcr.io/zakariaeelhajri/chatapp-api:latest
