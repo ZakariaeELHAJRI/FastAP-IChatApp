@@ -5,5 +5,22 @@ services:
     command: uvicorn main:app --host 0.0.0.0 --port 80 --reload
     ports:
     - 8000:80
+    environment:
+      DB_HOST               : ${DB_HOST}
+      DB_NAME               : ${DB_NAME}
+      DB_USER               : ${DB_USER}
+      DB_PASS               : ${DB_PASS}
     volumes:
     - ./chatapp:/app/chatapp
+
+  db:
+    image: mariadb:11
+    ports:
+    - 3306:3306
+    environment:
+      MYSQL_ROOT_PASSWORD   : ${DB_ROOT_PASS}
+      MYSQL_DATABASE        : ${DB_NAME}
+      MYSQL_USER            : ${DB_USER}
+      MYSQL_PASSWORD        : ${DB_PASS}
+    volumes:
+    - ./db:/var/lib/mysql
