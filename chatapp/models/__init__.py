@@ -6,3 +6,4 @@ class Model(DeclarativeBase):
 
 # imports
 from chatapp.models.user import User
+from chatapp.models.message import Message
