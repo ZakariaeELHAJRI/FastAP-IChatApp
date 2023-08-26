@@ -12,7 +12,7 @@ class Friendship(Model):
 
     user_id: Mapped[int] = mapped_column(Integer,ForeignKey('user.id'), nullable=False )
     friend_id: Mapped[int] = mapped_column(Integer, ForeignKey('user.id') , nullable=False)
-    status: Mapped[str] = mapped_column(String(64), nullable=False) # pending, accepted, rejected
+    status: Mapped[str] = mapped_column(String(64), nullable=False) # pending, accepted, rejected 
 
     user = relationship("User", foreign_keys=[user_id], back_populates="friends")
     friend = relationship("User", foreign_keys=[friend_id], back_populates="friends_of")
