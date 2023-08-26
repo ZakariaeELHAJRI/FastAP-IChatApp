@@ -11,6 +11,9 @@ config = context.config
 
 # db
 import os
+from dotenv import load_dotenv
+load_dotenv()
+print(os.environ["DB_URI"])
 DB_URI = os.environ["DB_URI"]
 config.set_main_option("sqlalchemy.url", DB_URI.replace("mysql+aiomysql", "mysql"))
 
