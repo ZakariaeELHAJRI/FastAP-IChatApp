@@ -1,6 +1,10 @@
 from sqlalchemy import Integer, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column , relationship
 from chatapp.models import Model
+from chatapp.models.message import Message
+from chatapp.models.friendships import Friendship
+
+
 
 class User(Model):
     __tablename__ = "user"
@@ -14,3 +18,9 @@ class User(Model):
     country: Mapped[str] = mapped_column(String(64))
     city: Mapped[str] = mapped_column(String(64))
 
+    messages_sent = relationship("Message", foreign_keys=[Message.sender_id], back_populates="sender")
+    messages_received = relationship("Message", foreign_keys=[Message.receiver_id], back_populates="receiver")
+
+     # Define the 'friends' and 'friends_of' relationships
+    friends = relationship("Friendship", foreign_keys=[Friendship.user_id], back_populates="user")
+    friends_of = relationship("Friendship", foreign_keys=[Friendship.friend_id], back_populates="friend")
