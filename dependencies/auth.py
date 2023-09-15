@@ -24,6 +24,9 @@ class Token(BaseModel):
 class TokenData(BaseModel):
     username: str = None    
 
+class UserCredentials(BaseModel):
+    username: str
+    password: str
  # Password hashing
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")   
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
