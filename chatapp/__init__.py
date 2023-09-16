@@ -2,7 +2,7 @@ from fastapi import FastAPI , Depends
 from fastapi.middleware.cors import CORSMiddleware
 from .database import Base , SessionLocal
 from sqlalchemy.orm import Session
-from chatapp.routers import user, message, friendships  , authentication # Import routers
+from chatapp.routers import user, message, friendships  , authentication , conversation # Import routers
 from chatapp.auth import auth # Import auth
 from dotenv import load_dotenv
 from chatapp.database import get_db
@@ -33,6 +33,7 @@ app.include_router(auth.auth_router, prefix="/api", tags=["auth"])
 app.include_router(user.router, prefix="/api", tags=["users"])
 app.include_router(message.router, prefix="/api", tags=["messages"])
 app.include_router(friendships.router, prefix="/api", tags=["friendships"])
+app.include_router(conversation.router, prefix="/api", tags=["conversations"])
 
 
 
