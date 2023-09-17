@@ -1,17 +1,33 @@
 from sqlalchemy.orm import Session
 from chatapp.models.message import Message
 from chatapp.models.friendships import Friendship
+from chatapp.models.user import User
 
 
 def create_message(db: Session, message_data: dict, sender_id: int, receiver_id: int, conversation_id: int):
-    # Check if a valid friendship exists between sender and receiver
-    friendship = db.query(Friendship).filter(
+    # Check if the sender and receiver are valid users (you can add more validation here)
+    sender = db.query(User).filter(User.id == sender_id).first()
+    receiver = db.query(User).filter(User.id == receiver_id).first()
+
+    if not sender or not receiver:
+        raise ValueError("Invalid sender or receiver.")
+
+    # Check if a valid friendship exists between sender and receiver (both directions)
+    friendship_sender_to_receiver = db.query(Friendship).filter(
         (Friendship.user_id == sender_id) & (Friendship.friend_id == receiver_id) &
         (Friendship.status == "accepted")
     ).first()
 
-    if not friendship:
-        raise ValueError("There is no accepted friendship between the sender and receiver.")
+    friendship_receiver_to_sender = db.query(Friendship).filter(
+        (Friendship.user_id == receiver_id) & (Friendship.friend_id == sender_id) &
+        (Friendship.status == "accepted")
+    ).first()
+
+    print("friendship_sender_to_receiver:", friendship_sender_to_receiver)
+    print("friendship_receiver_to_sender:", friendship_receiver_to_sender)
+
+    if not (   friendship_receiver_to_sender or friendship_sender_to_receiver):
+        raise ValueError("There is no accepted friendship between the sender and receiver zaki. "+friendship_sender_to_receiver+" "+friendship_receiver_to_sender+" zaki")
 
     # Create a new Message instance directly with the arguments
     new_message = Message(
@@ -25,6 +41,7 @@ def create_message(db: Session, message_data: dict, sender_id: int, receiver_id:
     db.commit()
     db.refresh(new_message)
     return new_message
+
 
 
 def get_message(db: Session, message_id: int):
