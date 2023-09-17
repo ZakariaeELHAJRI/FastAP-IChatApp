@@ -13,6 +13,11 @@ def create_new_message(message_data: dict, current_user: User = Depends(get_curr
     conversation_id = message_data.get("conversation_id")  # Assuming you have a "conversation_id" field in the message_data
 
     try:
+        # Check if 'receiver_id' and 'conversation_id' are valid and belong to the second user
+        receiver = db.query(User).filter(User.id == receiver_id).first()
+        if not receiver:
+            raise ValueError("Invalid receiver.")
+
         # Remove 'sender_id' from 'message_data'
         if 'sender_id' in message_data:
             del message_data['sender_id']
@@ -21,6 +26,7 @@ def create_new_message(message_data: dict, current_user: User = Depends(get_curr
         return message
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
 
 
 
