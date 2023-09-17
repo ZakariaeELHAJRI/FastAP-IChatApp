@@ -163,6 +163,7 @@ def get_conversation(conversation_id: int, current_user: User = Depends(get_curr
     conversation_data = {
         "id": conversation.id,
         "current_user_id": current_user.id,
+        "friend_id": friend_id,
         "name": friend_name,
         "message": last_message_content,
         "messages": messages_data,
