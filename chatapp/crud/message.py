@@ -3,7 +3,7 @@ from chatapp.models.message import Message
 from chatapp.models.friendships import Friendship
 
 
-def create_message(db: Session, message_data: dict, sender_id: int, receiver_id: int):
+def create_message(db: Session, message_data: dict, sender_id: int, receiver_id: int, conversation_id: int):
     # Check if a valid friendship exists between sender and receiver
     friendship = db.query(Friendship).filter(
         (Friendship.user_id == sender_id) & (Friendship.friend_id == receiver_id) &
@@ -13,11 +13,19 @@ def create_message(db: Session, message_data: dict, sender_id: int, receiver_id:
     if not friendship:
         raise ValueError("There is no accepted friendship between the sender and receiver.")
 
-    new_message = Message(**message_data, user_id=sender_id)
+    # Create a new Message instance directly with the arguments
+    new_message = Message(
+        content=message_data.get("content"),
+        sender_id=sender_id,
+        receiver_id=receiver_id,
+        conversation_id=conversation_id
+    )
+    
     db.add(new_message)
     db.commit()
     db.refresh(new_message)
     return new_message
+
 
 def get_message(db: Session, message_id: int):
     return db.query(Message).filter(Message.id == message_id).first()
