@@ -35,7 +35,7 @@ class WebSocketConsumer:
         else:
             print("User", receiver_id, "is not connected")
 
-# Create an instance of WebSocketConsumer
+# Create an instance of WebSocketConsumer 
 websocket_consumer = WebSocketConsumer()
 
 app = FastAPI()
@@ -62,7 +62,7 @@ app.include_router(message.router, prefix="/api", tags=["messages"])
 app.include_router(friendships.router, prefix="/api", tags=["friendships"])
 app.include_router(conversation.router, prefix="/api", tags=["conversations"])
 
-# Define a custom dependency function that combines get_current_user and get_db
+# Define a custom dependency function that combines get_current_user and get_db 
 def get_current_user_and_db(websocket: WebSocket, db: Session = Depends(get_db)):
     current_user = websocket.get('current_user')
     return current_user, db
