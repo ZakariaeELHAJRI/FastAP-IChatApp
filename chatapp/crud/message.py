@@ -1,7 +1,31 @@
-from sqlalchemy.orm import Session
+from fastapi import HTTPException
+from sqlalchemy.orm import Session 
 from chatapp.models.message import Message
 from chatapp.models.friendships import Friendship
 from chatapp.models.user import User
+
+def create_new_message(
+    message_data: dict,
+    current_user: User,
+    db: Session,
+):
+    sender_id = current_user.id
+    receiver_id = message_data.get("receiver_id")
+    conversation_id = message_data.get("conversation_id")
+
+    try:
+        receiver = db.query(User).filter(User.id == receiver_id).first()
+        if not receiver:
+            raise ValueError("Invalid receiver.")
+
+        if "sender_id" in message_data:
+            del message_data["sender_id"]
+
+        message = create_message(db, message_data, sender_id, receiver_id, conversation_id)
+
+        return message
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 def create_message(db: Session, message_data: dict, sender_id: int, receiver_id: int, conversation_id: int):
