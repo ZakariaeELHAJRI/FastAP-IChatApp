@@ -1,34 +1,20 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException  , WebSocket , WebSocketDisconnect
 from sqlalchemy.orm import Session
-from chatapp.crud.message import create_message, get_message, get_messages , update_message, delete_message
+from chatapp.crud.message import  get_message, get_messages , update_message, delete_message ,create_new_message
 from chatapp.database import get_db
 from chatapp.models.message import Message
 from dependencies.auth import User, get_current_user
 router = APIRouter()
 
+   
 @router.post("/messages/")
-def create_new_message(message_data: dict, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    sender_id = current_user.id  # Get the sender's user ID from the authenticated user
-    receiver_id = message_data.get("receiver_id")  # Assuming you have a "receiver_id" field in the message_data
-    conversation_id = message_data.get("conversation_id")  # Assuming you have a "conversation_id" field in the message_data
-
-    try:
-        # Check if 'receiver_id' and 'conversation_id' are valid and belong to the second user
-        receiver = db.query(User).filter(User.id == receiver_id).first()
-        if not receiver:
-            raise ValueError("Invalid receiver.")
-
-        # Remove 'sender_id' from 'message_data'
-        if 'sender_id' in message_data:
-            del message_data['sender_id']
-
-        message = create_message(db, message_data, sender_id, receiver_id, conversation_id)
-        return message
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-
-
+async def create_message_endpoint(
+    message_data: dict,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    created_message = create_new_message(message_data, current_user, db)
+    return created_message
 
 @router.get("/messages/{message_id}")
 def get_single_message(message_id: int,current_user: User = Depends(get_current_user),  db: Session = Depends(get_db)):
