@@ -100,7 +100,6 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int, token: str = Qu
                 await websocket_consumer.send_message(int(receiver_id), new_message_data)
                 create_new_message(new_message_data, current_user, db)
                 print("The message has been sent to the recipient")
-
     except WebSocketDisconnect:
         websocket_consumer.disconnect(str(user_id))
     except Exception as e:
