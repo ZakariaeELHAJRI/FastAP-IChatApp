@@ -31,7 +31,7 @@ def get_single_user_by_username(username: str, current_user: User = Depends(get_
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return user
-
+ 
 
 @router.put("/users/{user_id}")
 def update_existing_user(user_id: int, user_data: dict, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
