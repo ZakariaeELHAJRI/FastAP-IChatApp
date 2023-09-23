@@ -26,14 +26,30 @@ class WebSocketConsumer:
         if user_id in self.connections:
             del self.connections[user_id]
 
-    async def send_message(self, receiver_id: int, message_data: Dict):
+    async def send_message(self, receiver_id: int, invitation_data: Dict):
         receiver_id_str = str(receiver_id)  # Convert receiver_id to a string
         print("connections:", self.connections)
         if receiver_id_str in self.connections:
             print("Sending message to user", receiver_id)
-            await self.connections[receiver_id_str].send_json(message_data)
+            await self.connections[receiver_id_str].send_json(invitation_data)
         else:
             print("User", receiver_id, "is not connected")
+    async def send_invitation(self, receiver_id: int, invitation_data: Dict):
+        receiver_id_str = str(receiver_id)
+        if receiver_id_str in self.connections:
+            print("Sending invitation to user", receiver_id)
+            await self.connections[receiver_id_str].send_json(invitation_data)
+        else:
+            print("User", receiver_id, "is not connected")
+        # Broadcast the invitation to all connected clients
+        await self.broadcast_invitation(invitation_data)
+
+
+    async def broadcast_invitation(self, invitation_data: Dict):
+        # Loop through all connected clients and send the invitation
+        for user_id, websocket in self.connections.items():
+            await websocket.send_json(invitation_data)
+
 
 # Create an instance of WebSocketConsumer 
 websocket_consumer = WebSocketConsumer()
@@ -66,7 +82,6 @@ app.include_router(conversation.router, prefix="/api", tags=["conversations"])
 def get_current_user_and_db(websocket: WebSocket, db: Session = Depends(get_db)):
     current_user = websocket.get('current_user')
     return current_user, db
-
 @app.websocket("/ws/{user_id}")
 async def websocket_endpoint(websocket: WebSocket, user_id: int, token: str = Query(...), db: Session = Depends(get_db)):
     current_user = await get_current_user_websocket(token, db)
@@ -79,16 +94,16 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int, token: str = Qu
     try:
         while True:
             # Receive messages from the client
-            message_data_str = await websocket.receive_text()
-            message_data = json.loads(message_data_str)
-            event_name = message_data.get("event")
+            data_str = await websocket.receive_text()
+            data = json.loads(data_str)
+            event_name = data.get("event")
 
             if event_name == "message":
-                content = message_data.get("content")
-                sender_id = message_data.get("sender_id")
-                receiver_id = message_data.get("receiver_id")
-                time = message_data.get("time")
-                conversation_id = message_data.get("conversation_id")
+                content = data.get("content")
+                sender_id = data.get("sender_id")
+                receiver_id = data.get("receiver_id")
+                time = data.get("time")
+                conversation_id = data.get("conversation_id")
 
                 new_message_data = {
                     "content": content,
@@ -101,6 +116,20 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int, token: str = Qu
                 await websocket_consumer.send_message(int(receiver_id), new_message_data)
                 create_new_message(new_message_data, current_user, db)
                 print("The message has been sent to the recipient")
+
+            elif event_name == "invitation":
+                print("data from client:", data)
+                sender_id = data['data'].get("user_id")
+                receiver_id = data['data'].get("friend_id")
+
+                new_invitation_data = {
+                    "sender_id": sender_id,
+                    "receiver_id": receiver_id,
+                    "status": "pending"
+                }
+                print("New invitation:", new_invitation_data)
+                await websocket_consumer.send_invitation(int(receiver_id), new_invitation_data)
+                print("The invitation has been sent to the recipient")
     except WebSocketDisconnect:
         websocket_consumer.disconnect(str(user_id))
     except Exception as e:
