@@ -49,7 +49,6 @@ class WebSocketConsumer:
         for user_id, websocket in self.connections.items():
             await websocket.send_json(invitation_data)
 
-
 # Create an instance of WebSocketConsumer 
 websocket_consumer = WebSocketConsumer()
 
