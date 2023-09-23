@@ -44,7 +44,6 @@ class WebSocketConsumer:
         # Broadcast the invitation to all connected clients
         await self.broadcast_invitation(invitation_data)
 
-
     async def broadcast_invitation(self, invitation_data: Dict):
         # Loop through all connected clients and send the invitation
         for user_id, websocket in self.connections.items():
