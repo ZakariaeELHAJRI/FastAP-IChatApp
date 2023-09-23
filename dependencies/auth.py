@@ -13,6 +13,14 @@ SECRET_KEY = "your-secret-key"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
+class UserInfo(BaseModel):
+    id: int
+    username: str
+    firstname: str
+    lastname: str
+    country: str
+    city: str
+
 
 class Token(BaseModel):
     access_token: str
