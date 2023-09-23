@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException , Query
 from sqlalchemy.orm import Session
 from chatapp.crud.user import create_user, get_user, get_users, update_user, delete_user
 from chatapp.database import get_db
-from dependencies.auth import User, get_current_user
+from dependencies.auth import User, get_current_user ,UserInfo
 from chatapp.models.user import User as UserModel
 from chatapp.models.friendships import Friendship
 
@@ -27,10 +27,19 @@ def get_all_users(skip: int = 0, limit: int = 10, current_user: User = Depends(g
 
 @router.get("/currentuser/{username}")
 def get_single_user_by_username(username: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    user = db.query(UserModel).filter(UserModel.username == username).first()
+    user = db.query(User).filter(User.username == username).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
-    return user
+    
+    user_info = UserInfo(
+        id=user.id,
+        username=user.username,
+        firstname=user.firstname,
+        lastname=user.lastname,
+        country=user.country,
+        city=user.city
+    )
+    return user_info
  
 
 @router.put("/users/{user_id}")
