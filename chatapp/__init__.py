@@ -41,8 +41,6 @@ class WebSocketConsumer:
             await self.connections[receiver_id_str].send_json(invitation_data)
         else:
             print("User", receiver_id, "is not connected")
-        # Broadcast the invitation to all connected clients
-        await self.broadcast_invitation(invitation_data)
 
     async def broadcast_invitation(self, invitation_data: Dict):
         # Loop through all connected clients and send the invitation
@@ -119,11 +117,14 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int, token: str = Qu
                 print("data from client:", data)
                 sender_id = data['data'].get("user_id")
                 receiver_id = data['data'].get("friend_id")
+                user_name = data['data'].get("user_name")
 
                 new_invitation_data = {
                     "sender_id": sender_id,
                     "receiver_id": receiver_id,
-                    "status": "pending"
+                    "status": "pending" ,
+                    "user_name": user_name
+                    
                 }
                 print("New invitation:", new_invitation_data)
                 await websocket_consumer.send_invitation(int(receiver_id), new_invitation_data)
