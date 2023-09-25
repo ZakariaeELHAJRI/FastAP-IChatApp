@@ -2,11 +2,44 @@ from sqlalchemy.orm import Session
 from chatapp.models.friendships import Friendship
 
 def create_friendship(db: Session, friendship_data: dict):
-    new_friendship = Friendship(**friendship_data)
-    db.add(new_friendship)
-    db.commit()
-    db.refresh(new_friendship)
-    return new_friendship
+    user_id = friendship_data.get('user_id')
+    friend_id = friendship_data.get('friend_id')
+    status = friendship_data.get('status')
+
+    if user_id is None or friend_id is None or status is None:
+        print("Invalid friendship data provided.")
+        return False
+
+    # Ensure that the user_id and friend_id combination is unique
+    existing_friendship = db.query(Friendship).filter(
+        ((Friendship.user_id == user_id) & (Friendship.friend_id == friend_id)) |
+        ((Friendship.user_id == friend_id) & (Friendship.friend_id == user_id))
+    ).first()
+
+    if existing_friendship:
+        print("The friendship already exists.")
+        return False
+
+    # Check if the inverse friendship exists
+    inverse_friendship = db.query(Friendship).filter(
+        (Friendship.user_id == friend_id) & (Friendship.friend_id == user_id)
+    ).first()
+
+    if inverse_friendship:
+        print("Inverse friendship already exists.")
+        return False
+
+    try:
+        # Add the friendship
+        new_friendship = Friendship(user_id=user_id, friend_id=friend_id, status=status)
+        db.add(new_friendship)
+        db.commit()
+        return True
+    except Exception as e:
+        db.rollback()
+        print(f"An error occurred while adding the friendship: {str(e)}")
+        return False
+
 
 def get_friendship(db: Session, friendship_id: int):
     return db.query(Friendship).filter(Friendship.id == friendship_id).first()
@@ -32,10 +65,18 @@ def delete_friendship(db: Session, friendship_id: int):
     return False
 
 def get_friendships_by_user(db: Session, user_id: int):
-    return db.query(Friendship).filter(Friendship.user_id == user_id).all()
+    try:
+        friendships = db.query(Friendship).filter(
+            (Friendship.user_id == user_id) | (Friendship.friend_id == user_id)
+        ).all()
+        return friendships
+    except Exception as e:
+        print(f"Une erreur s'est produite : {str(e)}")
+        return []
 
 def get_friendships_by_friend(db: Session, friend_id: int):
     return db.query(Friendship).filter(Friendship.friend_id == friend_id).all()
+
 
 
 
