@@ -7,6 +7,7 @@ from chatapp.auth import auth
 from dotenv import load_dotenv
 from chatapp.database import get_db
 from dependencies.auth import get_current_user_websocket
+from chatapp.crud.friendships import create_friendship
 import asyncio
 import json
 from typing import Dict
@@ -119,15 +120,21 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int, token: str = Qu
                 receiver_id = data['data'].get("friend_id")
                 user_name = data['data'].get("user_name")
 
-                new_invitation_data = {
+                new_invitation_data_socket = {
                     "sender_id": sender_id,
                     "receiver_id": receiver_id,
                     "status": "pending" ,
                     "user_name": user_name
                     
                 }
-                print("New invitation:", new_invitation_data)
-                await websocket_consumer.send_invitation(int(receiver_id), new_invitation_data)
+                invitation_data =  {
+                    "user_id": sender_id,
+                    "friend_id": receiver_id,
+                    "status": "pending" 
+                }
+                print("New invitation:", invitation_data)
+                await websocket_consumer.send_invitation(int(receiver_id), new_invitation_data_socket)
+                create_friendship(db, invitation_data)
                 print("The invitation has been sent to the recipient")
     except WebSocketDisconnect:
         websocket_consumer.disconnect(str(user_id))
