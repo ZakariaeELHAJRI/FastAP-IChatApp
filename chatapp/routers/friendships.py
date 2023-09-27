@@ -1,21 +1,29 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from chatapp.crud.friendships import create_friendship, get_friendship, get_friendships , update_friendship, delete_friendship 
+from chatapp.crud.friendships import create_friendship, get_friendship, get_friendships, get_friendships_invitations , update_friendship, delete_friendship 
 from chatapp.database import get_db
 from chatapp.models.friendships import Friendship
 from dependencies.auth import User, get_current_user
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.DEBUG)
 router = APIRouter()
 
 @router.post("/friendships/")
 def create_new_friendship(friendship_data: dict,current_user: User = Depends(get_current_user),  db: Session = Depends(get_db)):
     return create_friendship(db, friendship_data)
 
-@router.get("/friendships/{friendship_id}")
-def get_single_friendship(friendship_id: int,current_user: User = Depends(get_current_user),  db: Session = Depends(get_db)):
-    friendship = get_friendship(db, friendship_id)
-    if friendship is None:
-        raise HTTPException(status_code=404, detail="Friendship not found")
-    return friendship
+@router.get("/friendships/{user_id}")
+def get_single_friendship(user_id: int, current_user: User = Depends(get_current_user),  db: Session = Depends(get_db)):
+    try:
+        friendship = get_friendships_invitations(db, user_id)
+        if friendship is None:
+            raise HTTPException(status_code=404, detail="Friendship not found")
+        return friendship
+    except Exception as e:
+        logging.error(f"Error in get_single_friendship: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 @router.get("/friendships/")
 def get_all_friendships(skip: int = 0, limit: int = 10,current_user: User = Depends(get_current_user),  db: Session = Depends(get_db)):
