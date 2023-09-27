@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 from chatapp.models.friendships import Friendship
+from chatapp.models.user import User
 
 def create_friendship(db: Session, friendship_data: dict):
     user_id = friendship_data.get('user_id')
@@ -73,6 +74,31 @@ def get_friendships_by_user(db: Session, user_id: int):
     except Exception as e:
         print(f"Une erreur s'est produite : {str(e)}")
         return []
+
+def get_friendships_invitations(db: Session, user_id: int):
+    try:
+        invitations = db.query(Friendship).filter(
+            (Friendship.friend_id == user_id) & (Friendship.status == "pending")
+        ).all()
+        
+        custom_invitations = [
+            {
+                "id": invitation.id,
+                "status": invitation.status,
+                "user_id": invitation.user_id,
+                "friend_id": invitation.friend_id,
+                "friend_first_name": db.query(User).filter(User.id == invitation.friend_id).first().firstname,
+                "friend_last_name": db.query(User).filter(User.id == invitation.friend_id).first().lastname,
+            }
+            for invitation in invitations
+        ]
+        
+        return custom_invitations
+
+    except Exception as e:
+        print(f"An error occurred while fetching invitations: {str(e)}")
+        return []
+    
 
 def get_friendships_by_friend(db: Session, friend_id: int):
     return db.query(Friendship).filter(Friendship.friend_id == friend_id).all()
