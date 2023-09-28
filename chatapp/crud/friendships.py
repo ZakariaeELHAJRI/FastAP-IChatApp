@@ -87,8 +87,8 @@ def get_friendships_invitations(db: Session, user_id: int):
                 "status": invitation.status,
                 "user_id": invitation.user_id,
                 "friend_id": invitation.friend_id,
-                "friend_first_name": db.query(User).filter(User.id == invitation.friend_id).first().firstname,
-                "friend_last_name": db.query(User).filter(User.id == invitation.friend_id).first().lastname,
+                "friend_first_name": db.query(User).filter(User.id == invitation.user_id).first().firstname,
+                "friend_last_name": db.query(User).filter(User.id == invitation.user_id).first().lastname,
             }
             for invitation in invitations
         ]
