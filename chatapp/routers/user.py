@@ -95,11 +95,11 @@ def get_all_users_with_common_friends(
         friendship_status = (
             db.query(Friendship.status)
             .filter(
-                Friendship.user_id == current_user.id,
-                Friendship.friend_id == user.id
+                ((Friendship.user_id == current_user.id) & (Friendship.friend_id == user.id)) |
+                ((Friendship.user_id == user.id) & (Friendship.friend_id == current_user.id))
             )
             .scalar()
-        )
+)
 
         # Create a dictionary with user details, common friends count, and status
         user_info = {
