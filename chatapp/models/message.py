@@ -1,7 +1,7 @@
 from chatapp.models import Model
 from sqlalchemy.orm import Mapped
 from sqlalchemy.orm import mapped_column
-from sqlalchemy import Integer, String, ForeignKey, DateTime, func
+from sqlalchemy import Integer, String, ForeignKey, DateTime, func , Boolean
 from datetime import datetime
 from sqlalchemy.orm import relationship
 
@@ -13,7 +13,7 @@ class Message(Model):
     receiver_id: Mapped[int] = mapped_column(Integer, ForeignKey('user.id'), nullable=False)
     content: Mapped[str] = mapped_column(String(256), nullable=False)
     send_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=func.now())
-
+    is_read: Mapped[bool] = mapped_column(Boolean, default=False)
     # Add a foreign key reference to the Conversation model
     conversation_id: Mapped[int] = mapped_column(Integer, ForeignKey('conversation.id'), nullable=False)
 
