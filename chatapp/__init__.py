@@ -27,14 +27,23 @@ class WebSocketConsumer:
         if user_id in self.connections:
             del self.connections[user_id]
 
-    async def send_message(self, receiver_id: int, invitation_data: Dict):
+    async def send_message(self, receiver_id: int,sender_id: int , invitation_data: Dict):
         receiver_id_str = str(receiver_id)  # Convert receiver_id to a string
+        sender_id_str = str(sender_id)
         print("connections:", self.connections)
         if receiver_id_str in self.connections:
             print("Sending message to user", receiver_id)
             await self.connections[receiver_id_str].send_json(invitation_data)
         else:
             print("User", receiver_id, "is not connected")
+        
+        if sender_id_str in self.connections:
+            print("Sending message to user", sender_id)
+            await self.connections[sender_id_str].send_json(invitation_data)
+        else:
+            print("User", sender_id, "is not connected")
+
+
     async def send_invitation(self, receiver_id: int, invitation_data: Dict):
         receiver_id_str = str(receiver_id)
         if receiver_id_str in self.connections:
@@ -115,16 +124,19 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int, token: str = Qu
                 receiver_id = data['data'].get("receiver_id")
                 time = data['data'].get("time")
                 conversation_id = data['data'].get("conversation_id")
+                is_read = data['data'].get("is_read")
 
                 new_message_data = {
                     "content": content,
                     "sender_id": sender_id,
                     "receiver_id": receiver_id,
                     "time": time,
-                    "conversation_id": conversation_id
+                    "conversation_id": conversation_id,
+                    "is_read": is_read,
+                    "event": "message"
                 }
                 print("New message:", new_message_data)
-                await websocket_consumer.send_message(int(receiver_id), new_message_data)
+                await websocket_consumer.send_message(int(receiver_id),int(sender_id), new_message_data)
                 create_new_message(new_message_data, current_user, db)
                 print("The message has been sent to the recipient")
 
