@@ -80,6 +80,7 @@ def get_conversations(current_user: User = Depends(get_current_user), db: Sessio
             "content": message.content,
             "time": message.send_at,
             "sender_id": message.sender_id,
+            "is_read": message.is_read,
         } for message in messages]
 
         # Get the last message in this conversation
@@ -94,6 +95,7 @@ def get_conversations(current_user: User = Depends(get_current_user), db: Sessio
         if last_message:
             last_message_content = last_message.content
             last_message_time = last_message.send_at
+            reciever_id = last_message.receiver_id
         else:
             last_message_content = ""
             last_message_time = None
@@ -102,10 +104,12 @@ def get_conversations(current_user: User = Depends(get_current_user), db: Sessio
         conversation_data.append({
             "id": conversation.id,
             "current_user_id": current_user.id,
+            "friend_id": reciever_id,
             "name": friend_name,
             "message": last_message_content,
             "messages": messages_data,
             "time": last_message_time,
+            "message_count": len(messages_data) if messages_data else 0,
         })
 
     return conversation_data
@@ -141,6 +145,7 @@ def get_conversation(conversation_id: int, current_user: User = Depends(get_curr
         "content": message.content,
         "time": message.send_at,
         "sender_id": message.sender_id,
+        "is_read": message.is_read,
     } for message in messages]
 
     # Get the last message in this conversation
@@ -155,6 +160,7 @@ def get_conversation(conversation_id: int, current_user: User = Depends(get_curr
     if last_message:
         last_message_content = last_message.content
         last_message_time = last_message.send_at
+        reciever_id = last_message.receiver_id
     else:
         last_message_content = ""
         last_message_time = None
