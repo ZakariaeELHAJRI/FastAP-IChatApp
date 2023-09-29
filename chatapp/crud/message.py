@@ -74,6 +74,9 @@ def get_message(db: Session, message_id: int):
 def get_messages(db: Session, skip: int = 0, limit: int = 10):
     return db.query(Message).offset(skip).limit(limit).all()
 
+def get_messages_by_conversation(db: Session, conversation_id: int):
+    return db.query(Message).filter(Message.conversation_id == conversation_id).all()
+
 def update_message(db: Session, message_id: int, message_data: dict):
     message = db.query(Message).filter(Message.id == message_id).first()
     for key, value in message_data.items():
