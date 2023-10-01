@@ -145,6 +145,7 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int, token: str = Qu
                     "receiver_id": receiver_id,
                     "status": "pending" ,
                     "user_name": user_name,
+                    "is_read": False,
                     "event": "invitation"
                     
                 }
@@ -152,6 +153,7 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int, token: str = Qu
                     "user_id": sender_id,
                     "friend_id": receiver_id,
                     "status": "pending",
+                    "is_read": False,
                     "event": "invitation"
                 }
                 print("New invitation:", invitation_data)
