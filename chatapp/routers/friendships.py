@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from chatapp.crud.friendships import create_friendship, get_friendship, get_friendships, get_friendships_invitations , update_friendship, delete_friendship 
+from chatapp.crud.friendships import create_friendship, get_friendship, get_friendships, get_friendships_by_user, get_friendships_invitations , update_friendship, delete_friendship 
 from chatapp.database import get_db
 from chatapp.models.friendships import Friendship
 from dependencies.auth import User, get_current_user
@@ -43,9 +43,26 @@ def delete_existing_friendship(friendship_id: int,current_user: User = Depends(g
         raise HTTPException(status_code=404, detail="Friendship not found")
     return {"message": "Friendship deleted successfully"}
 
+@router.put("/mark-invitation-as-read/{user_id}")
+def mark_invitation_as_read(user_id: int, db: Session = Depends(get_db)):
+    try:
+        friendships = get_friendships_by_user(db, user_id)
+        if not friendships:
+            raise HTTPException(status_code=404, detail="Friendship not found")
 
-def get_friendships_by_user(user_id: int, db: Session, current_user: User = Depends(get_current_user)):
-    return db.query(Friendship).filter(Friendship.user_id == user_id).all()
+        for friendship in friendships:
+            if not friendship.is_read:
+                friendship.is_read = True
+
+        db.commit()
+        print("friendships:", friendships)  # Check if the changes are reflected here
+        return friendships
+    except Exception as e:
+        logging.error(f"Error in mark_invitation_as_read: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error")
+
+    
+
 
 def get_friendships_by_friend(friend_id: int, db: Session, current_user: User = Depends(get_current_user)):
     return db.query(Friendship).filter(Friendship.friend_id == friend_id).all()
