@@ -68,7 +68,7 @@ def delete_friendship(db: Session, friendship_id: int):
 def get_friendships_by_user(db: Session, user_id: int):
     try:
         friendships = db.query(Friendship).filter(
-            (Friendship.user_id == user_id) | (Friendship.friend_id == user_id)
+            (Friendship.friend_id == user_id) & (Friendship.status == "pending")
         ).all()
         return friendships
     except Exception as e:
@@ -87,6 +87,7 @@ def get_friendships_invitations(db: Session, user_id: int):
                 "status": invitation.status,
                 "user_id": invitation.user_id,
                 "friend_id": invitation.friend_id,
+                "is_read": invitation.is_read,
                 "friend_first_name": db.query(User).filter(User.id == invitation.user_id).first().firstname,
                 "friend_last_name": db.query(User).filter(User.id == invitation.user_id).first().lastname,
             }
