@@ -51,19 +51,13 @@ class WebSocketConsumer:
             await self.connections[receiver_id_str].send_json(invitation_data)
         else:
             print("User", receiver_id, "is not connected")
-    async def send_accepation(self, user1_id: int, user2_id: int, invitation_data: Dict):
+    async def send_accepation(self, user1_id: int, invitation_data: Dict):
         user1_id_str = str(user1_id)
-        user2_id_str = str(user2_id)
         if user1_id_str in self.connections:
             print("Sending acceptance to user", user1_id)
             await self.connections[user1_id_str].send_json(invitation_data)
         else:
             print("User", user1_id, "is not connected")
-        if user2_id_str in self.connections:
-            print("Sending acceptance to user", user2_id)
-            await self.connections[user2_id_str].send_json(invitation_data)
-        else:
-            print("User", user2_id, "is not connected")
 
     async def broadcast_invitation(self, invitation_data: Dict):
         # Loop through all connected clients and send the invitation
@@ -167,8 +161,8 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int, token: str = Qu
             
             elif event_name == "acceptance":
 
-                user1_id = data['data'].get("user1_id")
-                user2_id = data['data'].get("user2_id")
+                user1_id = data['data'].get("user_id")
+                user2_id = data['data'].get("friend_id")
 
                 new_acceptance_data_socket = {
                     "user1_id": user1_id,
@@ -176,7 +170,8 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int, token: str = Qu
                     "status": "accepted",
                     "event": "acceptance"
                 }
-                await websocket_consumer.send_accepation(int(user1_id),int(user2_id), new_acceptance_data_socket)
+                print("New acceptance:", new_acceptance_data_socket)
+                await websocket_consumer.send_accepation(int(user1_id), new_acceptance_data_socket)
                 print("The acceptance has been sent to the recipient")
 
     except WebSocketDisconnect:
