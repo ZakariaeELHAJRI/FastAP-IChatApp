@@ -1,8 +1,9 @@
 from fastapi import FastAPI, WebSocket, Depends, WebSocketDisconnect, Query
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from chatapp.routers import user, message, friendships, authentication, conversation
+from chatapp.routers import user, message, friendships, authentication, conversation , notification
 from chatapp.crud.message import create_new_message
+from chatapp.crud.notification import create_notification
 from chatapp.auth import auth
 from dotenv import load_dotenv
 from chatapp.database import get_db
@@ -58,7 +59,19 @@ class WebSocketConsumer:
             await self.connections[user1_id_str].send_json(invitation_data)
         else:
             print("User", user1_id, "is not connected")
-
+    async def new_conversation(self, receiver_id: int,sender_id: int , invitation_data: Dict):
+        receiver_id_str = str(receiver_id)
+        sender_id_str = str(sender_id)
+        if receiver_id_str in self.connections:
+            print("Sending message to user", receiver_id)
+            await self.connections[receiver_id_str].send_json(invitation_data)
+        else:
+            print("User", receiver_id, "is not connected")
+        
+        if sender_id_str in self.connections:
+            print("Sending message to user", sender_id)
+            await self.connections[sender_id_str].send_json(invitation_data)
+        
     async def broadcast_invitation(self, invitation_data: Dict):
         # Loop through all connected clients and send the invitation
         for user_id, websocket in self.connections.items():
@@ -90,6 +103,7 @@ app.include_router(user.router, prefix="/api", tags=["users"])
 app.include_router(message.router, prefix="/api", tags=["messages"])
 app.include_router(friendships.router, prefix="/api", tags=["friendships"])
 app.include_router(conversation.router, prefix="/api", tags=["conversations"])
+app.include_router(notification.router, prefix="/api", tags=["notifications"])
 
 # Define a custom dependency function that combines get_current_user and get_db 
 def get_current_user_and_db(websocket: WebSocket, db: Session = Depends(get_db)):
@@ -162,7 +176,7 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int, token: str = Qu
                 print("The invitation has been sent to the recipient")
             
             elif event_name == "acceptance":
-
+                
                 user1_id = data['data'].get("user_id")
                 user2_id = data['data'].get("friend_id")
 
@@ -172,9 +186,29 @@ async def websocket_endpoint(websocket: WebSocket, user_id: int, token: str = Qu
                     "status": "accepted",
                     "event": "acceptance"
                 }
+                notification_data = {
+                    "sender_id": user2_id,
+                    "recipient_id": user1_id,
+                    "message": "accepte your invitation",
+                   
+                }
                 print("New acceptance:", new_acceptance_data_socket)
                 await websocket_consumer.send_accepation(int(user1_id), new_acceptance_data_socket)
+                create_notification(db, notification_data)
                 print("The acceptance has been sent to the recipient")
+            elif event_name == "newConversation":
+                user1_id = data['data'].get("user1_id")
+                user2_id = data['data'].get("user2_id")
+                print('data new conversation:', data)
+
+                new_conversation_data_socket = {
+                    "user1_id": user1_id,
+                    "user2_id": user2_id,
+                    "event": "newConversation"
+                }
+                print("New conversation:", new_conversation_data_socket)
+                await websocket_consumer.new_conversation(int(user1_id),int(user2_id), new_conversation_data_socket)
+                print("The conversation has been sent to the recipient")
 
     except WebSocketDisconnect:
         websocket_consumer.disconnect(str(user_id))
