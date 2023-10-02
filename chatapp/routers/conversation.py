@@ -90,7 +90,6 @@ def get_conversations(current_user: User = Depends(get_current_user), db: Sessio
             .order_by(Message.send_at.desc())
             .first()
         )
-
         # Extract the last message content and send time
         if last_message:
             last_message_content = last_message.content
@@ -99,7 +98,7 @@ def get_conversations(current_user: User = Depends(get_current_user), db: Sessio
         else:
             last_message_content = ""
             last_message_time = None
-
+            reciever_id = None
         # Add conversation data to the list, including the messages
         conversation_data.append({
             "id": conversation.id,
