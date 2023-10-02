@@ -3,6 +3,17 @@ from sqlalchemy.orm import Session
 from chatapp.models.conversation import Conversation
 
 def create_conversation(db: Session, conversation_data: dict):
+    # Check if a conversation already exists between user1 and user2
+    existing_conversation = db.query(Conversation).filter(
+        ((Conversation.user1_id == conversation_data['user1_id']) & (Conversation.user2_id == conversation_data['user2_id'])) |
+        ((Conversation.user1_id == conversation_data['user2_id']) & (Conversation.user2_id == conversation_data['user1_id']))
+    ).first()
+
+    if existing_conversation:
+        # Conversation already exists, return it or handle the duplication as needed
+        return existing_conversation
+
+    # If no existing conversation found, create a new one
     conversation = Conversation(**conversation_data)
     db.add(conversation)
     db.commit()
