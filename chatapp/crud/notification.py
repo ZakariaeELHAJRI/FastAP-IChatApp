@@ -33,5 +33,9 @@ def delete_notification(db: Session, notification_id: int):
     return True
 
 def get_notifications_by_user(db: Session, user_id: int):
-    return db.query(Notification).filter(Notification.recipient_id == user_id).all()
+    notification = db.query(Notification).filter(Notification.recipient_id == user_id).all()
+    print('notification:', notification)
+    if notification is None:
+        return None
+    return notification
 
