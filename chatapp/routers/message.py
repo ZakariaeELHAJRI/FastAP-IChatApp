@@ -37,7 +37,7 @@ def update_existing_message(message_id: int, message_data: dict,current_user: Us
     return message
 
 @router.put("/mark-messages-as-read/{conversation_id}")
-def mark_messages_as_read(conversation_id: int, db: Session = Depends(get_db)):
+def mark_messages_as_read(conversation_id: int,current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     try:
         conversation = get_conversation(db, conversation_id)
         if not conversation:
@@ -47,7 +47,7 @@ def mark_messages_as_read(conversation_id: int, db: Session = Depends(get_db)):
         if messages:
                 # Mark only unread messages in the conversation as read
                 for message in messages:
-                    if not message.is_read:
+                    if not message.is_read and message.receiver_id==current_user.id :
                         message.is_read = True
 
                 db.commit()
