@@ -2,14 +2,16 @@ from fastapi import APIRouter, Depends, HTTPException , Query
 from sqlalchemy.orm import Session
 from chatapp.crud.user import create_user, get_user, get_users, update_user, delete_user
 from chatapp.database import get_db
-from dependencies.auth import User, get_current_user ,UserInfo
+from dependencies.auth import User, get_current_user ,UserInfo, get_password_hash
 from chatapp.models.user import User as UserModel
 from chatapp.models.friendships import Friendship
 
 router = APIRouter()
 
 @router.post("/users/")
-def create_new_user(user_data: dict, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+def create_new_user(user_data: dict, db: Session = Depends(get_db)):
+    hash_password=  get_password_hash(user_data["password"])
+    user_data["password"]=hash_password
     return create_user(db, user_data)
 
 @router.get("/users/{user_id}")
