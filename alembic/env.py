@@ -12,11 +12,11 @@ config = context.config
 # db
 import os
 from dotenv import load_dotenv
-load_dotenv()
+load_dotenv('.env')
 print(os.environ["DB_URI"])
-DB_URI = os.environ["DB_URI"]
-config.set_main_option("sqlalchemy.url", DB_URI.replace("mysql+aiomysql", "mysql"))
+DB_URI='mysql+pymysql://root:root@db:3306/chatApp2'
 
+config.set_main_option("sqlalchemy.url", DB_URI.replace("mysql+aiomysql", "mysql"))
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
@@ -24,6 +24,8 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 # for 'autogenerate' support
+# from myapp import mymodel
+# target_metadata = mymodel.Base.metadata
 from chatapp.models import Model
 target_metadata = Model.metadata
 
