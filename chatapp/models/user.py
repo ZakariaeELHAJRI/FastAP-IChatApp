@@ -18,6 +18,7 @@ class User(Model):
     password: Mapped[str] = mapped_column(String(64), nullable=False)
     country: Mapped[str] = mapped_column(String(64))
     city: Mapped[str] = mapped_column(String(64))
+    profile_photo_path: Mapped[str] = mapped_column(String(255), nullable=True)
 
     messages_sent = relationship("Message", foreign_keys=[Message.sender_id], back_populates="sender")
     messages_received = relationship("Message", foreign_keys=[Message.receiver_id], back_populates="receiver")
