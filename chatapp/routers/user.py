@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException , Query
+from fastapi import APIRouter, Depends, HTTPException , Query , File , UploadFile
 from sqlalchemy.orm import Session
 from chatapp.crud.user import create_user, get_user, get_users, update_user, delete_user
 from chatapp.database import get_db
@@ -45,11 +45,20 @@ def get_single_user_by_username(username: str, current_user: User = Depends(get_
  
 
 @router.put("/users/{user_id}")
-def update_existing_user(user_id: int, user_data: dict, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    user = update_user(db, user_id, user_data)
+def update_existing_user(user_id: int, user_data: dict, profile_photo: UploadFile = File(None), current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.id == user_id).first()
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
+    for key, value in user_data.items():
+        setattr(user, key, value)
+    if profile_photo:
+        profile_photo_path = f"profile_photos/{user_id}_{profile_photo.filename}"
+        with open(profile_photo_path, "wb") as image_file:
+            image_file.write(profile_photo.file.read())
+        user.profile_photo_path = profile_photo_path
+    db.commit()
     return user
+
 
 @router.delete("/users/{user_id}")
 def delete_existing_user(user_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
