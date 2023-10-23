@@ -29,6 +29,7 @@ def upgrade() -> None:
     sa.Column('password', sa.String(length=64), nullable=False),
     sa.Column('country', sa.String(length=64), nullable=False),
     sa.Column('city', sa.String(length=64), nullable=False),
+    sa.Column('profile_photo_path', sa.String(length=255), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_user_email'), 'user', ['email'], unique=True)
