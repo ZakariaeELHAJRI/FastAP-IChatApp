@@ -14,8 +14,8 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 print(os.environ["DB_URI"])
-DB_URI = os.environ["DB_URI"]
-#DB_URI = "mysql+aiomysql://root:root@db:3306/chatapp2"
+#DB_URI = os.environ["DB_URI"]
+DB_URI = "mysql+aiomysql://root:root@localhost:3306/chatapp2"
 config.set_main_option("sqlalchemy.url", DB_URI.replace("mysql+aiomysql", "mysql"))
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
