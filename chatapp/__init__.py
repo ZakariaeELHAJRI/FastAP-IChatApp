@@ -83,10 +83,7 @@ websocket_consumer = WebSocketConsumer()
 app = FastAPI()
 
 # Configure CORS settings
-origins = [
-    "http://localhost:3000",  # Add the URL of your Next.js frontend
-    "http://localhost:8000",  # Add the URL of your FastAPI server
-]
+origins = ["*"]
 
 app.add_middleware(
     CORSMiddleware,
